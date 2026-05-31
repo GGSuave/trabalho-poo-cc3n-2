@@ -16,11 +16,11 @@ A conta poupança não possui limite e o saldo nunca pode ficar negativo. Ela po
 
 Regras comuns a ambas as contas:
 
-toda conta possui número, titular e saldo inicial
-toda conta possui um extrato que registra cada operação realizada
-é possível creditar, debitar e transferir valores entre contas
-nenhuma operação aceita valores negativos ou iguais a zero
-toda operação deve ser registrada no extrato da conta
+toda conta possui número, titular e saldo inicial X
+toda conta possui um extrato que registra cada operação realizada X
+é possível creditar, debitar e transferir valores entre contas X
+nenhuma operação aceita valores negativos ou iguais a zero X
+toda operação deve ser registrada no extrato da conta X
 
 
 O Extrato
