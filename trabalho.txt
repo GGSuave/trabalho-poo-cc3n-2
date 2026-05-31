@@ -1,0 +1,95 @@
+O CodeBank é um banco digital em expansão que possui agências distribuídas em diferentes regiões do país. Com o crescimento da base de clientes, o controle manual das operações tornou-se inviável, gerando erros nos saldos, cobranças indevidas e dificuldades na emissão de relatórios gerenciais.
+A diretoria do banco decidiu investir em um sistema informatizado orientado a objetos desenvolvido em Java. Você faz parte da equipe de desenvolvimento contratada para construir esse sistema do zero, seguindo todas as regras de negócio levantadas durante as reuniões com os gestores do banco.
+
+O Banco
+O CodeBank possui três agências físicas. Cada agência pode atender até dez clientes cadastrados. O banco precisa ter uma visão consolidada de todas as agências, sabendo quantos clientes cada uma possui e qual é o saldo total de dinheiro custodiado em toda a instituição.
+
+Os Clientes
+Cada cliente possui nome, CPF e pode ter até cinco contas cadastradas no banco, sendo elas de tipos diferentes. Um cliente pode ter, por exemplo, uma conta corrente e uma conta poupança ao mesmo tempo. O cliente existe de forma independente das contas e se uma conta for encerrada, o cliente permanece cadastrado no sistema.
+
+As Contas
+O banco oferece dois tipos de conta:
+Conta Corrente
+A conta corrente possui um limite de cheque especial que permite ao cliente realizar saques e pagamentos mesmo quando o saldo está zerado, até o limite contratado. Por exemplo, um cliente com saldo de R$ 200,00 e limite de R$ 500,00 pode debitar até R$ 700,00. Caso o valor solicitado ultrapasse o saldo somado ao limite, a operação deve ser bloqueada com uma mensagem de erro clara. A conta corrente também possui uma tarifa mensal fixa de R$ 15,00 cobrada automaticamente pelo sistema.
+Conta Poupança
+A conta poupança não possui limite e o saldo nunca pode ficar negativo. Ela possui uma taxa de rendimento mensal que é aplicada sobre o saldo atual. Por exemplo, uma taxa de 0,5% sobre um saldo de R$ 1.000,00 gera um rendimento de R$ 5,00. O rendimento só pode ser aplicado se o saldo for maior que zero.
+
+Regras comuns a ambas as contas:
+
+toda conta possui número, titular e saldo inicial
+toda conta possui um extrato que registra cada operação realizada
+é possível creditar, debitar e transferir valores entre contas
+nenhuma operação aceita valores negativos ou iguais a zero
+toda operação deve ser registrada no extrato da conta
+
+
+O Extrato
+Cada conta possui seu próprio extrato, que é criado automaticamente no momento em que a conta é aberta e deixa de existir quando a conta é encerrada. O extrato armazena até cinquenta registros de operações em um vetor de texto. Cada registro descreve a operação realizada, o valor e o saldo resultante. O extrato pode ser exibido a qualquer momento listando todas as operações na ordem em que foram realizadas.
+
+As Tarifas
+Contas correntes são tributáveis. O sistema deve reconhecer quais contas possuem cobrança de tarifa e aplicá-la automaticamente. A tarifa de R$ 15,00 é debitada diretamente do saldo e registrada no extrato como uma operação de cobrança. Contas poupança não possuem tarifa.
+
+As Operações
+O sistema deve suportar as seguintes operações financeiras:
+Crédito
+Depositar um valor na conta. O valor deve ser maior que zero. O saldo aumenta e a operação é registrada no extrato.
+Débito
+Retirar um valor da conta. O valor deve ser maior que zero. Na conta corrente, o valor não pode ultrapassar saldo mais limite. Na conta poupança, o valor não pode ultrapassar o saldo. A operação é registrada no extrato.
+Transferência
+Transferir um valor de uma conta de origem para uma conta de destino. O sistema debita da origem e credita no destino. As mesmas regras de validação do débito se aplicam. Ambas as contas registram a operação em seus extratos.
+Rendimento
+Aplicar o rendimento mensal na conta poupança. Só é possível se o saldo for maior que zero. O valor do rendimento é calculado e somado ao saldo. A operação é registrada no extrato.
+Tarifa
+Cobrar a tarifa mensal da conta corrente. O valor é debitado do saldo e registrado no extrato.
+
+Os Erros
+O sistema deve identificar e tratar adequadamente as seguintes situações de erro, impedindo que operações inválidas sejam realizadas e informando claramente o motivo ao usuário:
+Valor inválido
+Ocorre quando o valor informado em qualquer operação é menor ou igual a zero. Mensagem esperada: o valor informado e a orientação de que deve ser maior que zero.
+Saldo insuficiente
+Ocorre quando se tenta debitar um valor maior que o saldo disponível na conta poupança. Mensagem esperada: o saldo disponível e o valor solicitado.
+Limite excedido
+Ocorre quando se tenta debitar um valor maior que o saldo somado ao limite na conta corrente. Mensagem esperada: o saldo atual, o limite disponível e o valor solicitado.
+Saldo negativo
+Ocorre quando se tenta aplicar rendimento em uma conta poupança com saldo igual ou menor que zero. Mensagem esperada: o saldo atual que impediu a operação.
+Toda operação deve ser envolta em blocos try/catch/finally. O bloco finally deve sempre exibir o saldo atual da conta após a tentativa da operação, independentemente de ter ocorrido erro ou não.
+
+Os Relatórios
+Ao final da execução, o sistema deve ser capaz de emitir:
+Extrato por conta
+Lista todas as operações registradas em uma conta específica, na ordem em que foram realizadas, numeradas sequencialmente.
+Clientes por agência
+Lista todos os clientes cadastrados em uma agência específica, exibindo nome, CPF e total de contas de cada um.
+Relatório geral do banco
+Percorre todas as agências e todos os clientes usando estrutura de matriz, exibindo o total de clientes por agência e o saldo total consolidado de todas as contas de todos os clientes de todo o banco.
+
+Resumo do que deve ser implementado
+Exceções personalizadas (4 classes):
+
+ValorInvalidoException
+SaldoInsuficienteException
+LimiteExcedidoException
+SaldoNegativoException
+
+Interface 1:
+
+Tributavel com os métodos calcularTarifa() e cobrarTarifa()
+
+Classe abstrata 1:
+
+Conta com o método abstrato debitar() e os métodos concretos creditar() e transferir()
+
+Subclasses 2:
+
+ContaCorrente — herda Conta, implementa Tributavel
+ContaPoupanca — herda Conta, possui aplicarRendimento()
+
+Classes de apoio 3:
+
+Extrato: composição com Conta, usa vetor String[] de 50 posições
+Cliente: agrega vetor Conta[] de até 5 contas
+Banco: organiza clientes em matriz Cliente[][] de 3 agências com 10 vagas cada
+
+Classe principal 1:
+
+Principal com o método main que instancia, opera e emite todos os relatórios.
