@@ -1,5 +1,6 @@
 package com.codebank.contas;
 
+import com.codebank.cliente.Cliente;
 import com.codebank.enums.TipoConta;
 import com.codebank.enums.TipoOperacao;
 import com.codebank.excecoes.SaldoInsuficienteException;
@@ -7,13 +8,24 @@ import com.codebank.excecoes.ValorInvalidoException;
 import com.codebank.extrato.Extrato;
 
 public abstract class Conta {
-	private String numero;
-	private Extrato extrato;
-	private double saldo;
-	private TipoConta tipoConta;
-	// private Cliente titular;
+	protected String numero;
+	protected Extrato extrato;
+	protected double saldo;
+	protected TipoConta tipoConta;
+	private Cliente titular;
 
 	// #region Construtor
+
+	/**
+	 * Contrutor mais básico. O saldo é iniciado zerado.
+	 * 
+	 * @param numero    String - Número da conta.
+	 * @param tipoConta TipoConta (Enum) - Tipo da conta.
+	 * @param titular   Cliente - Cliente titular da conta.
+	 */
+	public Conta(String numero, TipoConta tipoConta, Cliente titular) {
+		this(numero, 0, tipoConta, titular);
+	}
 
 	/**
 	 * 
@@ -22,10 +34,11 @@ public abstract class Conta {
 	 * @param tipoConta TipoConta (Enum) - Tipo da conta.
 	 * @author Guilherme
 	 */
-	public Conta(String numero, double saldo, TipoConta tipoConta) {
+	public Conta(String numero, double saldo, TipoConta tipoConta, Cliente titular) {
 		this.saldo = saldo;
 		this.numero = numero;
 		this.tipoConta = tipoConta;
+		this.titular = titular;
 
 		this.extrato = new Extrato();
 	}
@@ -46,6 +59,22 @@ public abstract class Conta {
 		return this.numero;
 	}
 
+	/**
+	 * Getter com algumas informações da conta.
+	 * 
+	 * @return String - Retorna o tipo da conta, o nome do titular e o Número da
+	 *         conta.
+	 * @author Guilherme
+	 */
+	public String sobreConta() {
+
+		return """
+				===| %s |===
+					Titular: %s
+					Número da conta: %s
+				========================
+				""".formatted(tipoConta.getNome(), titular.getNome(), this.getNumero());
+	}
 	// #endregion Getters
 
 	// #region Funções
@@ -56,15 +85,25 @@ public abstract class Conta {
 	 * 
 	 * @param valor Double - Valor a ser debitado.
 	 * @throws ValorInvalidoException Caso o valor seja negativo.
+	 * @return Boolean - Retorna se o deposito foi um sucesso.
 	 * @author Guilherme
 	 */
-	public void depositar(double valor) throws ValorInvalidoException {
-		if (valor < 0)
-			throw new ValorInvalidoException(valor);
+	public boolean depositar(double valor) {
+		try {
+			validaValor(valor);
 
-		this.saldo += valor;
+			this.saldo += valor;
 
-		this.extrato.registrarOperacao(TipoOperacao.CREDITO, valor, this.getSaldo());
+			this.extrato.registrarOperacao(TipoOperacao.CREDITO, valor, this.getSaldo());
+
+			return true;
+
+		} catch (ValorInvalidoException e) {
+			System.out.println(e.getMessage());
+
+			return false;
+		}
+
 	}
 
 	/**
@@ -87,24 +126,12 @@ public abstract class Conta {
 	}
 
 	/**
+	 * Metodo abstrato a ser tratado de forma individual. Deve-se descontar do
+	 * saldo.
 	 * 
-	 * @param valor Double - Valor a ser sacado da conta.
-	 * @throws ValorInvalidoException     Se o valor desejado for menor que 0.
-	 * @throws SaldoInsuficienteException Se o saldo da conta for menor que o
-	 *                                    valor desejado.
 	 * @author Guilherme
 	 */
-	public void sacar(double valor) throws ValorInvalidoException, SaldoInsuficienteException {
-		if (valor < 0)
-			throw new ValorInvalidoException(valor);
-
-		if (this.getSaldo() < valor)
-			throw new SaldoInsuficienteException(this.getSaldo(), valor);
-
-		this.saldo -= valor;
-
-		this.extrato.registrarOperacao(TipoOperacao.DEBITO, valor, this.getSaldo());
-	}
+	public abstract boolean sacar(double valor);
 
 	/**
 	 * Função responsável pela transferência do valor de uma conta para outra.
@@ -136,15 +163,6 @@ public abstract class Conta {
 
 	// #endregion Operações
 
-	// #region Funções Abstratas
-
-	@Override
-	public abstract String toString();
-
-	public abstract String sobreConta();
-
-	// #endregion Funções Abstratas
-
 	// #region Funções de Validação (Try e Catch)
 
 	/**
@@ -155,7 +173,7 @@ public abstract class Conta {
 	 *                                    valor desejado.
 	 * @author O maior preguiçoso do mundo (Little Suave)! :D
 	 */
-	private void validarSaldo(double valor) throws SaldoInsuficienteException {
+	protected void validarSaldo(double valor) throws SaldoInsuficienteException {
 		if (this.getSaldo() < valor)
 			throw new SaldoInsuficienteException(this.getSaldo(), valor);
 	}
@@ -167,8 +185,8 @@ public abstract class Conta {
 	 * @throws SaldoInsuficienteException Se o valor desejado for menor que 0.
 	 * @author O maior preguiçoso do mundo (Little Suave)! :D
 	 */
-	private void validaValor(double valor) throws ValorInvalidoException {
-		if (valor < 0)
+	protected void validaValor(double valor) throws ValorInvalidoException {
+		if (valor <= 0)
 			throw new ValorInvalidoException(valor);
 	}
 
