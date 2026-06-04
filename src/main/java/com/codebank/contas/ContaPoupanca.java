@@ -49,17 +49,27 @@ public class ContaPoupanca extends Conta {
      * @author Guilherme
      */
     public boolean aplicarRendimento() {
-        try {
-            this.verificarPossibilidadeRendimento(super.getSaldo());
+        boolean sucesso = false;
 
-            double saldoAtual = super.getSaldo();
-            super.saldo *= 0.005;
-            super.extrato.registrarOperacao(TipoOperacao.RENDIMENTO, saldoAtual, saldo);
+        try {
+            this.verificarPossibilidadeRendimento();
+
+            double rendimento = super.saldo * 0.005;
+            super.saldo += rendimento;
+
+            super.extrato.registrarOperacao(TipoOperacao.RENDIMENTO, rendimento, saldo);
+
+            sucesso = true;
         } catch (SaldoNegativoException e) {
             System.out.println(e.getMessage());
+        } finally {
+            if (sucesso)
+                super.exibirSaldo(TipoOperacao.RENDIMENTO);
+            else
+                super.exibirSaldo();
         }
 
-        return false;
+        return sucesso;
     }
 
     // #region Metodos reescritos
@@ -73,7 +83,9 @@ public class ContaPoupanca extends Conta {
      * @author Guilherme
      */
     @Override
-    public boolean sacar(double valor) {
+    public boolean debitar(double valor) {
+        boolean sucesso = false;
+
         try {
             super.validaValor(valor);
             super.validarSaldo(valor);
@@ -81,22 +93,33 @@ public class ContaPoupanca extends Conta {
             super.saldo -= valor;
             super.extrato.registrarOperacao(TipoOperacao.DEBITO, valor, super.getSaldo());
 
-            return true;
+            sucesso = true;
         } catch (ValorInvalidoException e) {
             System.out.println(e.getMessage());
         } catch (SaldoInsuficienteException e) {
             System.out.println(e.getMessage());
+        } finally {
+            if (sucesso)
+                super.exibirSaldo(TipoOperacao.DEBITO);
+            else
+                super.exibirSaldo();
         }
 
-        return false;
+        return sucesso;
     }
 
     // #endregion Metodos reescritos
 
     // #region Verificações
 
-    public void verificarPossibilidadeRendimento(double saldo) throws SaldoNegativoException {
-        if (super.getSaldo() == 0)
+    /**
+     * Verifica a possibilidade de aplicar um rendimento no saldo atual da conta.
+     * 
+     * @throws SaldoNegativoException Dispara se o saldo <= 0.
+     * @author Guilherme.
+     */
+    private void verificarPossibilidadeRendimento() throws SaldoNegativoException {
+        if (super.getSaldo() == 0 || super.getSaldo() < 0)
             throw new SaldoNegativoException(super.getSaldo());
     }
 

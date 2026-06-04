@@ -5,10 +5,11 @@ public enum TipoOperacao {
     DEBITO(2, "Débito"),
     DEBITO_CHEQUE(3, "Débito com Cheque Especial"),
     TRANSFERENCIA_ENVIADA(4, "Transferência Enviada"),
-    TRANSFERENCIA_RECEBIDA(5, "Transferência Recebida"),
-    RENDIMENTO(6, "Rendimento"),
-    TARIFA(7, "Tarifa"),
-    PAGAR_DEBITO_CHEQUE(8, "Débito Após Pagar Débito de Cheque Especial");
+    TRANSFERENCIA_ENVIADA_LIMITE(5, "Transferência Enviada Com Limite"),
+    TRANSFERENCIA_RECEBIDA(6, "Transferência Recebida"),
+    RENDIMENTO(7, "Rendimento"),
+    TARIFA(8, "Tarifa"),
+    PAGAR_DEBITO_CHEQUE(9, "Débito Após Pagar Débito de Cheque Especial");
 
     private final int codigo;
     private final String descricao;

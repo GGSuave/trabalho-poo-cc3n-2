@@ -4,6 +4,7 @@ import com.codebank.cliente.Cliente;
 import com.codebank.enums.TipoConta;
 import com.codebank.enums.TipoOperacao;
 import com.codebank.excecoes.DebitoChequeInexistente;
+import com.codebank.excecoes.LimiteExcedidoException;
 import com.codebank.excecoes.SaldoInsuficienteException;
 import com.codebank.excecoes.ValorInvalidoException;
 import com.codebank.interfaces.Tributavel;
@@ -57,8 +58,8 @@ public class ContaCorrente extends Conta implements Tributavel {
 
 	// #region Métodos
 
-	public double getDebitoDeChequeEspecial() {
-		return this.debitoChequeEspecial;
+	public String getDebitoDeChequeEspecial() {
+		return "R$ %s".formatted(super.formatarValor(this.debitoChequeEspecial));
 	}
 
 	/**
@@ -70,23 +71,31 @@ public class ContaCorrente extends Conta implements Tributavel {
 	 * @author Guilherme
 	 */
 	public boolean pagarDebitoChequeComSaldo() {
+		boolean sucesso = false;
 		try {
 			this.validarExistenciaDeDebito();
 			super.validarSaldo(this.debitoChequeEspecial);
 
-			super.saldo -= this.debitoChequeEspecial;
+			double valorPagar = this.debitoChequeEspecial;
 			this.debitoChequeEspecial = 0;
 
-			super.extrato.registrarOperacao(TipoOperacao.DEBITO, debitoChequeEspecial, saldo);
+			super.saldo -= valorPagar;
 
-			return true;
+			super.extrato.registrarOperacao(TipoOperacao.DEBITO_CHEQUE, valorPagar, super.saldo);
+
+			sucesso = true;
 		} catch (DebitoChequeInexistente e) {
 			System.out.println(e.getMessage());
 		} catch (SaldoInsuficienteException e) {
 			System.out.println(e.getMessage());
+		} finally {
+			if (sucesso)
+				super.exibirSaldo(TipoOperacao.DEBITO);
+			else
+				super.exibirSaldo();
 		}
 
-		return false;
+		return sucesso;
 	}
 
 	// #region Overrided
@@ -116,6 +125,7 @@ public class ContaCorrente extends Conta implements Tributavel {
 	@Override
 	public void cobrarTarifa() {
 		super.saldo -= calcularTarifa();
+		super.extrato.registrarOperacao(TipoOperacao.TARIFA, calcularTarifa(), super.getSaldo());
 	}
 
 	/**
@@ -134,12 +144,13 @@ public class ContaCorrente extends Conta implements Tributavel {
 	 * @author Little Suave.
 	 */
 	@Override
-	public boolean sacar(double valor) {
+	public boolean debitar(double valor) {
+		boolean sucesso = false;
+		boolean precisaUsarCheque = valor > super.getSaldo();
+
 		try {
 			super.validaValor(valor);
 			this.validarSaldoComLimite(valor);
-
-			boolean precisaUsarCheque = valor > super.getSaldo();
 
 			if (precisaUsarCheque) {
 				double limiteNecessario = valor - super.getSaldo();
@@ -155,17 +166,69 @@ public class ContaCorrente extends Conta implements Tributavel {
 					: TipoOperacao.DEBITO,
 					valor, super.getSaldo());
 
-			return true;
-		} catch (SaldoInsuficienteException e) {
+			sucesso = true;
+		} catch (LimiteExcedidoException e) {
 			System.out.println(e.getMessage());
 		} catch (ValorInvalidoException e) {
 			System.out.println(e.getMessage());
+		} finally {
+			if (sucesso)
+				super.exibirSaldo(precisaUsarCheque
+						? TipoOperacao.DEBITO_CHEQUE
+						: TipoOperacao.DEBITO);
+			else
+				super.exibirSaldo();
 		}
 
-		return false;
+		return sucesso;
 
 	}
 
+	/**
+	 * Função responsável pela transferência do valor de uma conta para outra.
+	 * 
+	 * @param contaDestino Conta - Conta que receberá o valor.
+	 * @param valor        Double - Valor a ser transferido.
+	 * 
+	 * @return boolean - Se a operação foi um sucesso
+	 * @author Guilherme
+	 */
+	public boolean transferir(Conta contaDestino, double valor) {
+		boolean sucesso = false;
+		boolean precisaUsarCheque = valor > super.getSaldo();
+
+		try {
+			validaValor(valor);
+			validarSaldoComLimite(valor);
+
+			if (precisaUsarCheque) {
+				double limiteNecessario = valor - super.getSaldo();
+				super.saldo = 0;
+
+				this.debitoChequeEspecial += limiteNecessario;
+				this.extrato.registrarOperacao(TipoOperacao.TRANSFERENCIA_ENVIADA_LIMITE, valor, this.getSaldo());
+
+				contaDestino.receberTransferencia(valor);
+			} else {
+				sucesso = super.transferir(contaDestino, valor);
+
+				return sucesso;
+			}
+
+			sucesso = true;
+		} catch (LimiteExcedidoException e) {
+			System.out.println(e.getMessage());
+		} catch (ValorInvalidoException e) {
+			System.out.println(e.getMessage());
+		} finally {
+			if (sucesso)
+				exibirSaldo(TipoOperacao.TRANSFERENCIA_ENVIADA_LIMITE);
+			else
+				exibirSaldo();
+		}
+
+		return sucesso;
+	}
 	// #endregion Overrided
 
 	// #region Validação
@@ -177,12 +240,12 @@ public class ContaCorrente extends Conta implements Tributavel {
 	 * @throws SaldoInsuficienteException
 	 * @author Guilherme
 	 */
-	protected void validarSaldoComLimite(double valor) throws SaldoInsuficienteException {
+	private void validarSaldoComLimite(double valor) throws LimiteExcedidoException {
 		if (this.getSaldoLimite() < valor)
-			throw new SaldoInsuficienteException(this.getSaldoLimite(), valor);
+			throw new LimiteExcedidoException(this.getSaldoLimite(), this.limiteChequeEspecial, valor);
 	}
 
-	protected void validarExistenciaDeDebito() throws DebitoChequeInexistente {
+	private void validarExistenciaDeDebito() throws DebitoChequeInexistente {
 		if (this.debitoChequeEspecial == 0)
 			throw new DebitoChequeInexistente();
 	}
