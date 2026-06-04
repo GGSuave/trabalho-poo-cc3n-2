@@ -62,6 +62,10 @@ public abstract class Conta {
 		return this.numero;
 	}
 
+	public Extrato getExtrato() {
+	return this.extrato;
+	}
+
 	/**
 	 * Getter com algumas informações da conta.
 	 * 
