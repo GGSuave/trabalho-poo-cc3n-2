@@ -27,7 +27,7 @@ public class Extrato {
      */
     public void registrarOperacao(TipoOperacao tipo, double valor, double saldoResultante) {
         if (totalOperacoes < 50) {
-            operacoes[totalOperacoes] = tipo.getDescricao() + " | Valor: R$" + valor + " | Saldo: R$" + saldoResultante;
+            operacoes[totalOperacoes] = tipo.getDescricao() + " | Valor: R$" + String.format("%.2f", valor) + " | Saldo: R$" + String.format("%.2f", saldoResultante);
             totalOperacoes++;
         }
     }
