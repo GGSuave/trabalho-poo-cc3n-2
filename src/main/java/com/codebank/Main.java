@@ -9,7 +9,9 @@ public class Main {
 
     public static void main(String[] args) {
 
+        // ============================================================
         // CONFIGURAÇÃO INICIAL DO BANCO
+        // ============================================================
 
         Banco banco = new Banco();
 
@@ -41,7 +43,9 @@ public class Main {
         banco.adicionarCliente(0, cliente2);
         banco.adicionarCliente(1, cliente3);
 
+        // ============================================================
         // OPERAÇÕES - CONTA CORRENTE (CC001 - Ana Paula)
+        // ============================================================
 
         System.out.println("\n========================================");
         System.out.println("  OPERAÇÕES - CC001 (Ana Paula Silva)");
@@ -65,7 +69,10 @@ public class Main {
         System.out.println("\n--- Tentativa de crédito com valor inválido (R$ -50,00) ---");
         cc1.creditar(-50.00); // deve falhar: valor inválido
 
+
+        // ============================================================
         // OPERAÇÕES - CONTA POUPANÇA (CP001 - Ana Paula)
+        // ============================================================
 
         System.out.println("\n========================================");
         System.out.println("  OPERAÇÕES - CP001 (Ana Paula Silva)");
@@ -83,7 +90,10 @@ public class Main {
         System.out.println("\n--- Tentativa de débito com saldo insuficiente (R$ 5.000,00) ---");
         cp1.debitar(5000.00); // deve falhar
 
+
+        // ============================================================
         // TRANSFERÊNCIAS
+        // ============================================================
 
         System.out.println("\n========================================");
         System.out.println("  TRANSFERÊNCIAS");
@@ -98,7 +108,10 @@ public class Main {
         System.out.println("\n--- Tentativa de transferência com valor zero ---");
         cc3.transferir(cp1, 0.00); // deve falhar: valor inválido
 
+
+        // ============================================================
         // OPERAÇÕES - CONTA CORRENTE (CC002 - Bruno)
+        // ============================================================
 
         System.out.println("\n========================================");
         System.out.println("  OPERAÇÕES - CC002 (Bruno Costa Lima)");
@@ -113,7 +126,10 @@ public class Main {
         System.out.println("\n--- Aplicação de rendimento em CP002 (0,5%) ---");
         cp2.aplicarRendimento();
 
+
+        // ============================================================
         // ERRO ESPERADO - Rendimento com saldo zero
+        // ============================================================
 
         System.out.println("\n========================================");
         System.out.println("  ERRO ESPERADO - Rendimento sem saldo");
@@ -123,7 +139,10 @@ public class Main {
         System.out.println("\n--- Tentativa de rendimento com saldo zero ---");
         cpVazia.aplicarRendimento(); // deve falhar: SaldoNegativoException
 
+
+        // ============================================================
         // RELATÓRIO: EXTRATOS POR CONTA
+        // ============================================================
 
         System.out.println("\n\n============================================================");
         System.out.println("  EXTRATO - CC001 (Ana Paula Silva)");
@@ -150,7 +169,10 @@ public class Main {
         System.out.println("============================================================");
         cc3.getExtrato().exibirExtrato();
 
+
+        // ============================================================
         // RELATÓRIO: CLIENTES POR AGÊNCIA
+        // ============================================================
 
         System.out.println("\n\n============================================================");
         System.out.println("  CLIENTES POR AGÊNCIA");
@@ -161,7 +183,10 @@ public class Main {
         System.out.println();
         banco.clientesPorAgencia(2);
 
+
+        // ============================================================
         // RELATÓRIO GERAL DO BANCO
+        // ============================================================
 
         System.out.println("\n\n============================================================");
         System.out.println("  RELATÓRIO GERAL DO BANCO");
